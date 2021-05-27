@@ -21,6 +21,7 @@
     "@angular/router": "~10.0.11",
     "@types/bingmaps": "0.0.1",
     "bingmaps": "^2.0.3",
+    "ol": "^6.5.0",
     "rxjs": "~6.5.5",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.3"

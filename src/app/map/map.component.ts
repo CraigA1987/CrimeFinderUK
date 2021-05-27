@@ -2,10 +2,134 @@ import {Component} from '@angular/core'
 import {BrowserModule} from '@angular/platform-browser'
 import { AppComponent } from '../app.component';
 
+import Map from 'ol/Map';
+import View from 'ol/View';
+import VectorLayer from 'ol/layer/Vector';
+import Style from 'ol/style/Style';
+import Icon from 'ol/style/Icon';
+import OSM from 'ol/source/OSM';
+import * as olProj from 'ol/proj';
+import TileLayer from 'ol/layer/Tile';
+
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css']
 })
 export class MapComponent{
+  map: any;
+
+  // object stores current location data
+  location = {
+    lat: 0,
+    long: 0
+  };
+
+  navigationAllowed: boolean = false;
+
+  ngOnInit(){
+    // Check to see if browser supports geolocation services
+    // if ("geolocation" in navigator) {
+    //   console.log("Geolocation is Available");
+    //   this.findUserLocation();  // attempt to find users location
+    // } else {
+    //  console.log("Geolocation is not Available");
+    //  this.defaultMap(); // map without users location on it
+    // }
+
+    // Find users current location
+    // if(navigator.geolocation){
+    //   navigator.geolocation.getCurrentPosition(position => {
+    //     console.log(position.coords);
+    //     this.location.lat = position.coords.latitude;
+    //     this.location.long = position.coords.longitude;
+    //     console.log(this.location);
+    //     this.navigationAllowed = true;
+    //     this.setupMap();
+    //   });
+    //    }
+
+    //   if(this.navigationAllowed == false){
+    //     this.findUserLocation();
+    //   }
+
+      if (navigator.permissions) {
+        navigator.permissions.query({ name: 'geolocation' }).then(result => {
+          if (result.state === 'granted') {
+            this.findUserLocation();
+          } else if (result.state === 'prompt') {
+            console.log('Permissions requested. Waiting for user input...')
+            this.findUserLocation();
+          } else if (result.state === 'denied') {
+            this.defaultMap();
+          }})}
+
+
+
+    // Create the map and center on users location
+
+    }
+
+
+    // Function gets users starting location, pinning it to the map, if not default to London
+    setupMap(){
+      console.log("MAP SETUP");
+      console.log(this.location);
+      var options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      };
+
+      this.map = new Map({
+        target: 'map',
+        layers: [
+          new TileLayer({
+            source: new OSM()
+          })
+        ],
+        view: new View({
+          center: olProj.fromLonLat([this.location.long, this.location.lat]),
+          zoom: 14
+        })
+      });
+
+      console.log(this.map);
+    }
+
+    defaultMap(){
+      console.log("MAP SETUP");
+      console.log(this.location);
+      var options = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      };
+
+      this.map = new Map({
+        target: 'map',
+        layers: [
+          new TileLayer({
+            source: new OSM()
+          })
+        ],
+        view: new View({
+          center: olProj.fromLonLat([0, 0]),
+          zoom: 14
+        })
+      });
+
+      console.log(this.map);
+    }
+
+    findUserLocation(){
+          navigator.geolocation.getCurrentPosition(position => {
+            console.log(position.coords);
+            this.location.lat = position.coords.latitude;
+            this.location.long = position.coords.longitude;
+            console.log("NEW LOCATIONS");
+            console.log(this.location);
+            this.setupMap();
+        }
+      )}
 };
