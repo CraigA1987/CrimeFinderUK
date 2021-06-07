@@ -23,10 +23,10 @@ import TileLayer from 'ol/layer/Tile';
 export class MapComponent{
   map: any;
 
-  // object stores current location data
+  // object stores current location data - default values are central London
   location = {
-    lat: 0,
-    long: 0
+    lat: 51.50749,
+    long: 0.1272
   };
 
   constructor(private dataService: DataService){}
@@ -55,6 +55,17 @@ export class MapComponent{
         })}
         console.log(this.location.lat, this.location.long);
     }
+
+    findUserLocation(){
+      navigator.geolocation.getCurrentPosition(position => {
+        console.log(position.coords);
+        this.location.lat = position.coords.latitude;
+        this.location.long = position.coords.longitude;
+        console.log("NEW LOCATIONS");
+        console.log(this.location);
+        this.setupMap();
+    }
+  )}
 
 
     // Function gets users starting location, pinning it to the map, if not default to London
@@ -108,14 +119,5 @@ export class MapComponent{
       // console.log(this.map);
     }
 
-    findUserLocation(){
-          navigator.geolocation.getCurrentPosition(position => {
-            console.log(position.coords);
-            this.location.lat = position.coords.latitude;
-            this.location.long = position.coords.longitude;
-            console.log("NEW LOCATIONS");
-            console.log(this.location);
-            this.setupMap();
-        }
-      )}
+
 };
