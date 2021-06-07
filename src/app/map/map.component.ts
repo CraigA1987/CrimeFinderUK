@@ -2,6 +2,10 @@ import {Component} from '@angular/core'
 import {BrowserModule} from '@angular/platform-browser'
 import { AppComponent } from '../app.component';
 
+import { DataService } from "src/app/data.service";
+
+import { Subscription } from "rxjs";
+
 import Map from 'ol/Map';
 import View from 'ol/View';
 import VectorLayer from 'ol/layer/Vector';
@@ -25,56 +29,38 @@ export class MapComponent{
     long: 0
   };
 
+  constructor(private dataService: DataService){}
+
   navigationAllowed: boolean = false;
 
+  private dataSubscription: Subscription;  // subscribe to the data service behaviour subject
+
   ngOnInit(){
-    // Check to see if browser supports geolocation services
-    // if ("geolocation" in navigator) {
-    //   console.log("Geolocation is Available");
-    //   this.findUserLocation();  // attempt to find users location
-    // } else {
-    //  console.log("Geolocation is not Available");
-    //  this.defaultMap(); // map without users location on it
-    // }
-
-    // Find users current location
-    // if(navigator.geolocation){
-    //   navigator.geolocation.getCurrentPosition(position => {
-    //     console.log(position.coords);
-    //     this.location.lat = position.coords.latitude;
-    //     this.location.long = position.coords.longitude;
-    //     console.log(this.location);
-    //     this.navigationAllowed = true;
-    //     this.setupMap();
-    //   });
-    //    }
-
-    //   if(this.navigationAllowed == false){
-    //     this.findUserLocation();
-    //   }
-
+    // LOOK INTO PROMISES TO MAKE THIS CODE ASYNC -> NEED TO GET THE COORDS FIRST BEFORE THE API CALL HAPPENS!
       if (navigator.permissions) {
         navigator.permissions.query({ name: 'geolocation' }).then(result => {
           if (result.state === 'granted') {
             this.findUserLocation();
+            this.dataService.updateData( new Date().getFullYear() -1, this.location.lat, this.location.long);
           } else if (result.state === 'prompt') {
             console.log('Permissions requested. Waiting for user input...')
             this.findUserLocation();
           } else if (result.state === 'denied') {
             this.defaultMap();
-          }})}
-
-
-
-    // Create the map and center on users location
-
+            this.dataService.updateData( new Date().getFullYear() -1, this.location.lat, this.location.long);
+          }
+          this.dataService.showCurrentData.subscribe(data => {
+            console.log(data);
+          })
+        })}
+        console.log(this.location.lat, this.location.long);
     }
 
 
     // Function gets users starting location, pinning it to the map, if not default to London
     setupMap(){
-      console.log("MAP SETUP");
-      console.log(this.location);
+      // console.log("MAP SETUP");
+      // console.log(this.location);
       var options = {
         enableHighAccuracy: true,
         timeout: 5000,
@@ -94,7 +80,7 @@ export class MapComponent{
         })
       });
 
-      console.log(this.map);
+      // console.log(this.map);
     }
 
     defaultMap(){
@@ -119,7 +105,7 @@ export class MapComponent{
         })
       });
 
-      console.log(this.map);
+      // console.log(this.map);
     }
 
     findUserLocation(){
