@@ -23,55 +23,63 @@ import TileLayer from 'ol/layer/Tile';
 export class MapComponent{
   map: any;
 
-  // object stores current location data - default values are central London
-  location = {
-    lat: 51.50749,
-    long: 0.1272
-  };
-
   constructor(private dataService: DataService){}
 
-  navigationAllowed: boolean = false;
-
-  private dataSubscription: Subscription;  // subscribe to the data service behaviour subject
 
   ngOnInit(){
-    // LOOK INTO PROMISES TO MAKE THIS CODE ASYNC -> NEED TO GET THE COORDS FIRST BEFORE THE API CALL HAPPENS!
-      if (navigator.permissions) {
-        navigator.permissions.query({ name: 'geolocation' }).then(result => {
-          if (result.state === 'granted') {
-            this.findUserLocation();
-            this.dataService.updateData( new Date().getFullYear() -1, this.location.lat, this.location.long);
-          } else if (result.state === 'prompt') {
-            console.log('Permissions requested. Waiting for user input...')
-            this.findUserLocation();
-          } else if (result.state === 'denied') {
-            this.defaultMap();
-            this.dataService.updateData( new Date().getFullYear() -1, this.location.lat, this.location.long);
-          }
-          this.dataService.showCurrentData.subscribe(data => {
-            console.log(data);
-          })
-        })}
-        console.log(this.location.lat, this.location.long);
+    // Subscribe to the dataService currentData so that we always get upto date crime data
+    this.dataService.showCurrentData.subscribe(data => {
+      console.log(data);
+    })
+
+
+    this.getLocationPermissions()
+    .then( this.findUserLocation)
+    .then((coords) => {
+      console.log("Map setup");
+      this.setupMap(coords[0], coords[1])
+      this.dataService.updateData( new Date().getFullYear() -1, coords[0], coords[1]);
+    })
+    .catch(error => {console.log(error)
+      this.setupMap(51.50749, 0.1272)});
+      this.dataService.updateData( new Date().getFullYear() -1, 51.50749, 0.1272);
+    }
+
+    getLocationPermissions(){
+            // console.log(this.userLocation);
+      return new Promise( (resolve, reject) => {
+        if (navigator.permissions) {
+          navigator.permissions.query({ name: 'geolocation' }).then(result => {
+            if (result.state === 'granted') {
+              // this.findUserLocation();
+              resolve( `Location aquired`);
+            } else if (result.state === 'prompt') {
+              console.log('Permissions requested. Waiting for user input...')
+              // this.findUserLocation();
+              resolve( `Location aquired`);
+            } else if (result.state === 'denied') {
+              // this.defaultMap();
+              reject( `Rejected, no user services`);
+            }
+          })}
+      })
     }
 
     findUserLocation(){
-      navigator.geolocation.getCurrentPosition(position => {
-        console.log(position.coords);
-        this.location.lat = position.coords.latitude;
-        this.location.long = position.coords.longitude;
-        console.log("NEW LOCATIONS");
-        console.log(this.location);
-        this.setupMap();
-    }
-  )}
+      return new Promise((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(position => {
+            console.log(position.coords);
+            console.log("NEW LOCATIONS");
+            console.log(position.coords.latitude, position.coords.longitude);
+            resolve([position.coords.latitude, position.coords.longitude]);
+            // this.setupMap(position.coords.latitude, position.coords.longitude);
+          })})
+      }
 
-
-    // Function gets users starting location, pinning it to the map, if not default to London
-    setupMap(){
-      // console.log("MAP SETUP");
-      // console.log(this.location);
+    // Function gets users starting user, pinning it to the map, if not default to London
+    setupMap(userLat: number, userLong: number){
+      console.log("MAP SETUP");
+      // console.log(this.user);
       var options = {
         enableHighAccuracy: true,
         timeout: 5000,
@@ -86,7 +94,7 @@ export class MapComponent{
           })
         ],
         view: new View({
-          center: olProj.fromLonLat([this.location.long, this.location.lat]),
+          center: olProj.fromLonLat([userLong, userLat]),
           zoom: 14
         })
       });
@@ -95,8 +103,7 @@ export class MapComponent{
     }
 
     defaultMap(){
-      console.log("MAP SETUP");
-      console.log(this.location);
+      console.log("DEFAULT MAP SETUP");
       var options = {
         enableHighAccuracy: true,
         timeout: 5000,
