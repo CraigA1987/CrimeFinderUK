@@ -8,6 +8,7 @@ import { Subscription } from "rxjs";
 
 import Map from 'ol/Map';
 import View from 'ol/View';
+import Overlay from 'ol/Overlay';
 import VectorLayer from 'ol/layer/Vector';
 import Style from 'ol/style/Style';
 import Icon from 'ol/style/Icon';
@@ -119,6 +120,20 @@ export class MapComponent {
         zoom: 14
       })
     });
+
+    var pos = olProj.fromLonLat([userLong, userLat]);
+
+    // Marker of crime area
+// https://openlayers.org/en/latest/examples/overlay.html
+    var marker = new Overlay({
+      position: pos,
+      positioning: 'center-center',
+      element: document.getElementById('marker'),
+      stopEvent: false,
+    });
+    this.map.addOverlay(marker);
+
   }
+
 
 };
