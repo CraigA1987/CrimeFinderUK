@@ -155,7 +155,7 @@
   height: 1.375em;
   width: 1.375em;
   line-height: 0.4em;
-  background-color: rgba(0, 60, 136, 0.5);
+  background-color: rgba(0, 59, 136, 0.719);
   border: none;
   border-radius: 2px;
 }
@@ -181,7 +181,7 @@
 .ol-control button:hover,
 .ol-control button:focus {
   text-decoration: none;
-  background-color: rgba(0, 60, 136, 0.7);
+  background-color: rgba(2, 38, 85, 0.781);
 }
 .ol-zoom .ol-zoom-in {
   border-radius: 2px 2px 0 0;
@@ -266,7 +266,7 @@
   display: inline-block;
 }
 .ol-overviewmap .ol-overviewmap-map {
-  border: 1px solid #7b98bc;
+  border: 1px solid #153f74;
   height: 150px;
   margin: 2px;
   width: 150px;
