@@ -1,0 +1,14 @@
+html,
+body {
+  height: 100%;
+  overflow: hidden; /* Hide scrollbars */
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+.mat-tab-group.mat-primary .mat-ink-bar {
+  height: 4px;
+  background-color: #60e7ff;
+}

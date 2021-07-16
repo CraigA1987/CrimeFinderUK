@@ -5,7 +5,13 @@ import {InfoComponent} from './info/info.component';
 import {MapComponent} from './map/map.component';
 import {SearchComponent} from './search/search.component';
 
+// Angular Material
+import {MatTabsModule} from '@angular/material/tabs';
+import {MatIconModule} from '@angular/material/icon';
+import {MatTableModule} from '@angular/material/table';
+
 import { AppComponent } from './app.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [ AppComponent,
@@ -15,7 +21,11 @@ import { AppComponent } from './app.component';
   ],
   imports: [
     BrowserModule,
-    HttpClientModule
+    HttpClientModule,
+    BrowserAnimationsModule,
+    MatTabsModule,
+    MatIconModule,
+    MatTableModule,
   ],
   providers: [
   ],

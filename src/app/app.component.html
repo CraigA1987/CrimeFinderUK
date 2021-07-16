@@ -1,4 +1,28 @@
-<h1>UK Crime Finder</h1>
-<app-info></app-info>
-<app-map></app-map>
-<app-search></app-search>
+<body class="mat-app-background">
+
+<h1 id="title">Crime Finder</h1>
+  <mat-tab-group mat-align-tabs="center" dynamicHeight>
+    <mat-tab label="Map">
+      <app-map></app-map>
+        <ng-template mat-tab-label>
+          Map
+        <mat-icon class="angular-icon">map</mat-icon>
+      </ng-template>
+    </mat-tab>
+    <mat-tab label="Info">
+      <app-info></app-info>
+        <ng-template mat-tab-label>
+          Info
+        <mat-icon class="angular-icon">info</mat-icon>
+    </ng-template>
+    </mat-tab>
+    <mat-tab label="Search">
+      <app-search></app-search>
+        <ng-template mat-tab-label>
+          Search
+        <mat-icon class="angular-icon">search</mat-icon>
+        </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+
+</body>
