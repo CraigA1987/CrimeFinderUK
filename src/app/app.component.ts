@@ -1,4 +1,5 @@
-import {Component} from '@angular/core'
+import {Component, ViewChild} from '@angular/core'
+import { MatTabGroup } from '@angular/material/tabs';
 import {BrowserModule} from '@angular/platform-browser'
 
 @Component({
@@ -7,6 +8,16 @@ import {BrowserModule} from '@angular/platform-browser'
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+
+  @ViewChild('tabs') tabsGroup: MatTabGroup;
+
+  constructor() { }
+
+  // Function is passed to child component
+  resetTabs(){
+    this.tabsGroup.selectedIndex = 0;
+  }
+
 }
 
 

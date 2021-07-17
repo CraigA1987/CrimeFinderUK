@@ -1,3 +1,6 @@
+// Map componenet creates a map and shows users location based on geo-location.
+// If no location can be found, a default map is created
+
 import { Component } from '@angular/core'
 import { BrowserModule } from '@angular/platform-browser'
 import { AppComponent } from '../app.component';
@@ -15,6 +18,7 @@ import Icon from 'ol/style/Icon';
 import OSM from 'ol/source/OSM';
 import * as olProj from 'ol/proj';
 import TileLayer from 'ol/layer/Tile';
+import { first, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-map',
@@ -25,37 +29,66 @@ export class MapComponent {
   map: any;
   apiData: any;  // stores all retrieved api data
 
+  userLatCoord: number;
+  userLngCoord: number;
+
+  currentMapMarker: any; // reference to the current map marker
+
   constructor(private dataService: DataService) { }
 
   ngOnInit() {
-    // Subscribe to the dataService currentData so that we always get upto date crime data
-    this.dataService.showCurrentData.subscribe(data => {
+    this.getLocationPermissions()
+      .then(this.findUserLocation)  // Attempt to get users initial geolocation info
+      .then((coords) => {  // If get geo data, Setup the map from the resulting geolocation data
+        console.log(coords);
+
+        this.userLatCoord = coords[0];
+        this.userLngCoord = coords[1];
+        // Get current date
+        let year = new Date().getFullYear();
+        let month =  new Date().getMonth();
+
+        this.dataService.updateData(year, month, coords[0], coords[1]);  // Make API call with geo data
+      })
+      .catch(error => {  // If no geo data avalaible, setup map with defaults
+        console.log(error)
+        // this.setupMap(this.dataService.defaultLat, this.dataService.defaultLng);
+        this.dataService.updateData(new Date().getFullYear() -1, 1, this.dataService.defaultLat, this.dataService.defaultLng);
+        this.userLatCoord = this.dataService.defaultLat;
+        this.userLngCoord = this.dataService.defaultLng;
+      });
+
+    // Subscribe to the dataService using first() so this only triggers once
+    this.dataService.showCurrentData.pipe(take(1)).subscribe(data => {
       this.apiData = data;
       console.log("DATA!!!!", this.apiData);
       // BUILD NEW MAP WHEN API DATA IS CHANGED!
       console.log(this.apiData.length);
       if(this.apiData.length < 1){
-        console.log("no crime data found");
-        this.setupMap(this.dataService.defaultLat, this.dataService.defaultLng);
+        console.log("no crime data found");  // Get coords based on the users coords
+        this.setupMap(this.userLatCoord, this.userLngCoord);
       }
       else{
         console.log("crime data found");
         this.setupMap(this.apiData[0].location.latitude, this.apiData[0].location.longitude);
       }
-    })
+    });
 
-    this.getLocationPermissions()
-      .then(this.findUserLocation)  // Attempt to get users initial geolocation info
-      .then((coords) => {  // If get geo data, Setup the map from the resulting geolocation data
-        // this.setupMap(coords[0], coords[1])
-        console.log(coords);
-        this.dataService.updateData(new Date().getFullYear() - 1, coords[0], coords[1]);  // Make API call with geo data
-      })
-      .catch(error => {  // If no geo data avalaible, setup map with defaults
-        console.log(error)
-        // this.setupMap(this.dataService.defaultLat, this.dataService.defaultLng);
-        this.dataService.updateData(new Date().getFullYear() - 1, this.dataService.defaultLat, this.dataService.defaultLng);
-      });
+        // Subscribe to the dataService currentData so that we always get upto date crime data
+        this.dataService.showCurrentData.subscribe(data => {
+          this.apiData = data;
+          console.log("Editting MAPPPPP");
+          // console.log("DATA!!!!", this.apiData);
+          // BUILD NEW MAP WHEN API DATA IS CHANGED!
+            console.log("crime data found");
+            try{
+              this.editMap(this.apiData[0].location.latitude, this.apiData[0].location.longitude);
+            }
+            catch{
+              this.editMap(this.userLatCoord, this.userLngCoord);
+            }
+
+        });
   }
 
   getLocationPermissions() {
@@ -97,9 +130,6 @@ export class MapComponent {
 
   // Function gets users starting user, pinning it to the map, if not default to London
   setupMap(userLat: number, userLong: number) {
-
-    // IF CRIME DATA - PLOT ON MAP AS HOTSPOTS
-
     console.log("MAP SETUP");
     // console.log(this.user);
     const options: object = {
@@ -117,22 +147,45 @@ export class MapComponent {
       ],
       view: new View({
         center: olProj.fromLonLat([userLong, userLat]),
-        zoom: 14
+        zoom: 16
       })
     });
 
     var pos = olProj.fromLonLat([userLong, userLat]);
+    console.log("pos ====", pos);
 
     // Marker of crime area
 // https://openlayers.org/en/latest/examples/overlay.html
-    var marker = new Overlay({
+    this.currentMapMarker = new Overlay({
       position: pos,
       positioning: 'center-center',
       element: document.getElementById('marker'),
       stopEvent: false,
     });
-    this.map.addOverlay(marker);
+    this.map.addOverlay(this.currentMapMarker);
+    console.log("map loaded fully");
+  }
 
+  editMap(userLat: number, userLong: number){
+
+    console.log("Editting map");
+
+    // Setup new center location
+    this.map.setView(new View({
+      center: olProj.fromLonLat([userLong, userLat]),
+      zoom: 16,
+    }));
+    var pos = olProj.fromLonLat([userLong, userLat]);
+    console.log("pos ====", pos);
+
+    // Set new map marker location
+    this.currentMapMarker = new Overlay({
+      position: pos,
+      positioning: 'center-center',
+      element: document.getElementById('marker'),
+      stopEvent: false,
+    });
+    this.map.addOverlay(this.currentMapMarker);
   }
 
 

@@ -22,14 +22,14 @@ export class DataService {
 
 
 
-  updateData(year: number, lat: number, long: number) {
+  updateData(year: number, month: number, lat: number, long: number) {
     let updatedData = this.http
-      .get(`https://data.police.uk/api/crimes-at-location?date=${year}-02&lat=${lat}&lng=${long}`).subscribe(res => {
+      .get(`https://data.police.uk/api/crimes-at-location?date=${year}-${month}&lat=${lat}&lng=${long}`).subscribe(res => {
         this.currentData.next(res);
       }, error => { // If non recognised location - revert back to default values
-        console.log("NO DATA FOUND AT LOCATION, DEFAULTING TO BUCKINGHAM PALACE");
+        console.log(`NO DATA FOUND AT LOCATION, DEFAULTING TO BUCKINGHAM PALACE IN JAN ${year}`);
         let updatedData = this.http
-          .get(`https://data.police.uk/api/crimes-at-location?date=${year}-02&lat=${this.defaultLat}&lng=${this.defaultLng}`)
+          .get(`https://data.police.uk/api/crimes-at-location?date=${year}-01&lat=${this.defaultLat}&lng=${this.defaultLng}`)
           .subscribe(res => {
             this.currentData.next(res);
           })
