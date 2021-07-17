@@ -19,8 +19,9 @@ export class SearchComponent implements OnInit {
   onUpdate(){
     console.log("Updated");
     // switch to map tab
-    this.resetTabs.emit(null); // pass event to parent (app.component.ts);
     this.dataService.updateData(new Date().getFullYear() -1, 1, this.dataService.defaultLat, this.dataService.defaultLng);
+    this.resetTabs.emit(null); // pass event to parent (app.component.ts);
+
   }
 
 }

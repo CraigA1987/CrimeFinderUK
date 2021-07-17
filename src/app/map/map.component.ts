@@ -7,7 +7,7 @@ import { AppComponent } from '../app.component';
 
 import { DataService } from "src/app/data.service";
 
-import { Subscription } from "rxjs";
+import { trigger, style, animate, transition } from '@angular/animations';
 
 import Map from 'ol/Map';
 import View from 'ol/View';
@@ -22,9 +22,24 @@ import { first, take } from 'rxjs/operators';
 
 @Component({
   selector: 'app-map',
+  animations: [
+    trigger(
+      'loadingAnimation', [
+        transition(':enter', [
+          style({opacity: 0}),
+          animate('500ms ease-in', style({opacity: 1}))
+        ]),
+        transition(':leave', [
+          style({opacity: 1}),
+          animate('500ms ease-out', style({opacity: 0})),
+        ])
+      ]
+    )
+  ],
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.css']
 })
+
 export class MapComponent {
   map: any;
   apiData: any;  // stores all retrieved api data
@@ -32,11 +47,19 @@ export class MapComponent {
   userLatCoord: number;
   userLngCoord: number;
 
+  dataIsLoading: boolean;
+
   currentMapMarker: any; // reference to the current map marker
 
   constructor(private dataService: DataService) { }
 
   ngOnInit() {
+    // Subscribe to data Service loading variable changes - control spinner
+    this.dataService.isLoading.subscribe( bool => {
+      this.dataIsLoading = bool;
+      console.log("Bool change", this.dataIsLoading);
+    });
+
     this.getLocationPermissions()
       .then(this.findUserLocation)  // Attempt to get users initial geolocation info
       .then((coords) => {  // If get geo data, Setup the map from the resulting geolocation data

@@ -1,7 +1,6 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
 import { DataService } from "src/app/data.service";
 
-import {MatPaginator} from '@angular/material/paginator';
 import {MatTableDataSource} from '@angular/material/table';
 
 // Interface gives a template of how CrimeData should act
@@ -19,7 +18,7 @@ interface CrimeData {
 })
 
 
-export class InfoComponent implements OnInit, AfterViewInit{
+export class InfoComponent implements OnInit{
 
   apiData: any;  // stores all retrieved api data
   crimeDataArray: Array<CrimeData> = [];  // array of crime data
@@ -28,12 +27,7 @@ export class InfoComponent implements OnInit, AfterViewInit{
   displayedColumns: string[] = ['Id', 'Date', 'Category', 'Outcome'];
   dataSource = new MatTableDataSource<CrimeData>(this.crimeDataArray);
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
   constructor(private dataService: DataService) { }
-
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
- }
 
   ngOnInit(): void {
     this.dataService.showCurrentData.subscribe(data => {

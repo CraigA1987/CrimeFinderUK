@@ -2,6 +2,11 @@ table {
   width: 100%;
 }
 
+.table-container {
+  height: calc(100vh - 110px);
+  overflow: auto;
+}
+
 .mat-row {
   height: auto;
 }

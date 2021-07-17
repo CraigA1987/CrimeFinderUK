@@ -1,6 +1,7 @@
 
 <p>Info works -> Say how many crimes found! Explore the table to see the crime details</p>
-<table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+<div class="mat-elevation-z8 table-container">
+<table mat-table [dataSource]="dataSource">
 
   <!--- Note that these columns can be defined in any order.
         The actual rendered columns are set as a property on the row definition" -->
@@ -37,5 +38,6 @@
   <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
   <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 </table>
-<mat-paginator [pageSizeOptions]="[3, 4, 5]" showFirstLastButtons></mat-paginator>
+</div>
+
 

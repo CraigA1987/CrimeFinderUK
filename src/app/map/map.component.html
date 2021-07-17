@@ -1,7 +1,9 @@
 
   <!-- API Key protected, locked down to a set domain from the Bing Maps Dev Center -->
-
-<div class="row">
+  <div *ngIf="dataIsLoading == true" @loadingAnimation >
+    <mat-progress-bar mode="indeterminate" id="progress-bar"></mat-progress-bar>
+  </div>
+<div div class="row">
     <div id="map"></div>
     <div id="marker" title="Marker"></div>
-</div>
+<div>
