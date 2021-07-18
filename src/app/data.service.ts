@@ -29,7 +29,9 @@ export class DataService {
     this.isLoading.next(true);
     const apiRequests = [];  // Hold all of the api request - one for each month
     for(let i = 1; i < 13; i++){  // loop 12 times
+      // Crimes at a specific location, to the nearest pre-defined location
       apiRequests.push(this.http.get(`https://data.police.uk/api/crimes-at-location?date=${year}-${i}&lat=${lat}&lng=${long}`)
+      // apiRequests.push(this.http.get(`https://data.police.uk/api/crimes-street/all-crime?lat=${lat}&lng=${long}&date=${year}-${i}`)
       .pipe(catchError(error => of(error))))
     }
     let crimeList: any = [];

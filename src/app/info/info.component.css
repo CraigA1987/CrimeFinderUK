@@ -3,7 +3,7 @@ table {
 }
 
 .table-container {
-  height: calc(100vh - 110px);
+  height: calc(100vh - 150px);
   overflow: auto;
 }
 
@@ -17,4 +17,12 @@ table {
 
 .mat-header-cell {
   color: #60e7ff;
+}
+
+#info-description {
+  width: 100%;
+  text-align: center;
+  padding: 12px 12px;
+  box-sizing: border-box;
+  margin: 0;
 }

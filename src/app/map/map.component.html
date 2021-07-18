@@ -1,8 +1,13 @@
 
   <!-- API Key protected, locked down to a set domain from the Bing Maps Dev Center -->
-  <div *ngIf="dataIsLoading == true" @loadingAnimation >
-    <mat-progress-bar mode="indeterminate" id="progress-bar"></mat-progress-bar>
-  </div>
+<div *ngIf="dataIsLoading == true" @loadingAnimation >
+  <mat-progress-bar mode="indeterminate" id="progress-bar"></mat-progress-bar>
+</div>
+
+<div>
+  <p id="map-description">The map shows the approximate location of crimes based on the input location</p>
+</div>
+
 <div div class="row">
     <div id="map"></div>
     <div id="marker" title="Marker"></div>

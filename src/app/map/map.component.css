@@ -1,7 +1,7 @@
 #map {
   /* minus the pixel heights of the items above the map
   Map takes up whole of remaining screen */
-  height: calc(100vh - 95px);
+  height: calc(100vh - 125px);
   width: 100%;
   overflow: hidden; /* Hide scrollbars */
 }
@@ -12,4 +12,12 @@
   top: 0;
   left: 0;
   z-index: 10;
+}
+
+#map-description {
+  width: 100%;
+  text-align: center;
+  padding: 12px 12px;
+  box-sizing: border-box;
+  margin: 0;
 }
