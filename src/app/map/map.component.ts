@@ -37,7 +37,7 @@ import { first, take } from 'rxjs/operators';
     )
   ],
   templateUrl: './map.component.html',
-  styleUrls: ['./map.component.css']
+  styleUrls: ['./map.component.scss']
 })
 
 export class MapComponent {
