@@ -1,3 +1,5 @@
+@import "~@angular/material/theming";
+
 table {
   width: 100%;
 }
@@ -15,10 +17,6 @@ table {
   padding: 12px 12px 12px 12px;
 }
 
-.mat-header-cell {
-  color: #60e7ff;
-}
-
 .info-description {
   width: 100%;
   text-align: center;
@@ -26,4 +24,16 @@ table {
   box-sizing: border-box;
   margin: 0;
   color: #acacac;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mat-header-cell {
+    color: #02dac5;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  .mat-header-cell {
+    color: #d32f2f;
+  }
 }
