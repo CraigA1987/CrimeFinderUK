@@ -4,7 +4,7 @@
 <div *ngIf="crimeNumber == 0">
   <p class="info-description">No crimes found, try searching a different year or location</p>
 </div>
-<div class="mat-elevation-z8 table-container" *ngIf="crimeNumber > 0">
+<div class="mat-elevation-z8 table-container">
 <table mat-table [dataSource]="dataSource">
 
   <!--- Note that these columns can be defined in any order.
