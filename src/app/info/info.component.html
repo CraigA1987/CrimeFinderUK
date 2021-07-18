@@ -1,5 +1,8 @@
-<div>
-  <p id="info-description">There have been {{crimeNumber}} crimes found. Explore the table to view details about the crimes</p>
+<div *ngIf="crimeNumber > 0">
+  <p class="info-description">Found {{crimeNumber}} crimes! Explore the table to view crimes details</p>
+</div>
+<div *ngIf="crimeNumber == 0">
+  <p class="info-description">No crimes found, try searching a different year or location</p>
 </div>
 <div class="mat-elevation-z8 table-container">
 <table mat-table [dataSource]="dataSource">

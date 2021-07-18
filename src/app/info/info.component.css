@@ -19,7 +19,7 @@ table {
   color: #60e7ff;
 }
 
-#info-description {
+.info-description {
   width: 100%;
   text-align: center;
   padding: 12px 12px;

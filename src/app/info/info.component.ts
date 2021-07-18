@@ -1,4 +1,4 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, Input, OnInit} from '@angular/core';
 import { DataService } from "src/app/data.service";
 
 import {MatTableDataSource} from '@angular/material/table';
@@ -22,6 +22,7 @@ export class InfoComponent implements OnInit{
 
   apiData: any;  // stores all retrieved api data
   crimeDataArray: Array<CrimeData> = [];  // array of crime data
+  @Input() crimeNumber: number = 0;  // pass data to template
 
   // Table Setup
   displayedColumns: string[] = ['Id', 'Date', 'Category', 'Outcome'];
@@ -51,6 +52,7 @@ export class InfoComponent implements OnInit{
         }
         this.crimeDataArray.push(mappedCrimeData);
         this.dataSource.data = this.crimeDataArray;  // update the table datasource
+        this.crimeNumber = this.dataSource.data.length;
       });
     })
     console.log("crime array data ====", this.crimeDataArray);
