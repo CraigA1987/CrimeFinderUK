@@ -14,6 +14,7 @@ $theming-material-components-theme: mat-light-theme(
   $theming-material-components-warn
 );
 
+/* Media Queries control auto dark / light themes */
 @media (prefers-color-scheme: light) {
   @include angular-material-theme($theming-material-components-theme);
 }
