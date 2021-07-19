@@ -1,22 +1,30 @@
 <div>
-  <p class="search-description">Search for UK destinations to find related crime data</p>
+  <p *ngIf="locationFound" class="search-description">Search for UK destinations to find related crime data</p>
+</div>
+<div>
+  <p *ngIf="!locationFound" class="search-description">Location not found, please try searching again</p>
 </div>
 
 <div id="card-container">
   <mat-card class="card">
-    <mat-card-header>
-      <div mat-card-avatar class="example-header-image"></div>
-      <mat-card-title>Shiba Inu</mat-card-title>
-      <mat-card-subtitle>Dog Breed</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+    <mat-card-content class="form-container">
+      <form #searchForm="ngForm" (ngSubmit)="onFormSubmit(searchForm)">
         <mat-form-field appearance="outline" color="accent">
-          <mat-label>Outline form field</mat-label>
-          <input matInput matNativeControl placeholder="Placeholder">
+          <mat-label for="text">Enter place name</mat-label>
+          <input matInput matNativeControl placeholder="Location" [(ngModel)]="search.location" name="location"  type="text"
+          maxlength="50" minlength="1" required>
         </mat-form-field>
+        <mat-form-field appearance="outline" color="accent">
+          <mat-label for="text">Enter full year</mat-label>
+          <input matInput type="number" matNativeControl placeholder="Year" [(ngModel)]="search.year" name="year" type="number"
+          [max]="maxYearValue" [min]="minYearValue" required>
+        </mat-form-field>
+        <mat-card-actions id="button-group">
+          <button type="submit" id="submit-button" mat-stroked-button color="primary"
+          [disabled]="!searchForm.valid">Search</button>
+        </mat-card-actions>
+      </form>
     </mat-card-content>
-    <mat-card-actions id="button-group">
-      <button id="submit-button" mat-stroked-button color="primary" (click)="onUpdate()">Search</button>
-    </mat-card-actions>
+
   </mat-card>
 </div>

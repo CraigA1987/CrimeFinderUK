@@ -24,8 +24,10 @@ export class DataService {
 
 
 
-  updateData(year: number, month: number, lat: number, long: number) {
+  updateData(year: number, lat: number, long: number) {
     // NEED TO PUT IN AN ALERT BOX WITH LOADING SPINNER DURING THIS!!!
+    console.log("UPDATING DATA ACROSS APP");
+    console.log("year === ", year, "lat ==== ", lat, "long =====", long);
     this.isLoading.next(true);
     const apiRequests = [];  // Hold all of the api request - one for each month
     for(let i = 1; i < 13; i++){  // loop 12 times
@@ -46,10 +48,19 @@ export class DataService {
           completedCrimeList.push(crime);
         });
       });
-
-      this.currentData.next(completedCrimeList);
-      console.log("CrimeList========", completedCrimeList);
-      setTimeout(() => this.isLoading.next(false), 500);  // half a second delay on removal of loading bar
+      if(completedCrimeList === undefined){
+        console.log(`NO DATA FOUND AT LOCATION, DEFAULTING TO BUCKINGHAM PALACE IN JAN ${year}`);
+        let updatedData = this.http
+          .get(`https://data.police.uk/api/crimes-at-location?date=${year}-01&lat=${this.defaultLat}&lng=${this.defaultLng}`)
+          .subscribe(res => {
+            this.currentData.next(res);
+          })
+      }
+      else{
+        this.currentData.next(completedCrimeList);
+        console.log("CrimeList========", completedCrimeList);
+        setTimeout(() => this.isLoading.next(false), 500);  // half a second delay on removal of loading bar
+      }
       },
       // REMOVE ALL THIS CODE -> NEED TO PUT MESSAGES IN COMPONENETS IF NO CRIMES ARE FOUND NOT HERE!!!!
       error => { // If non recognised location - revert back to default values
@@ -60,6 +71,30 @@ export class DataService {
             this.currentData.next(res);
           })
       });
+  }
+
+  // Send string location to geocoding API
+  doGeocoding(locationString: string): Promise<any>{
+      console.log(locationString);
+      let correctedString = locationString.split(' ').join('%20'); // API uses %20 as spaces
+      correctedString = correctedString.split('+').join('%20'); // API uses %20 as spaces not '+'
+      let geocodeRequest = new Promise((resolve, reject) => {
+      this.http
+          .get(`https://nominatim.openstreetmap.org/search/${correctedString}?format=json`)
+          .toPromise()
+          .then((res: any) => {
+            console.log(res);
+            // Success - return first array element returned from the API
+            resolve(res);
+          },
+            err => {
+              // Error - just send an empty array
+              reject();
+            }
+          );
+      });
+      return geocodeRequest;
+
   }
 
 }

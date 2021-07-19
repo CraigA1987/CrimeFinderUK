@@ -23,7 +23,7 @@ import { first, take } from 'rxjs/operators';
 @Component({
   selector: 'app-map',
   animations: [
-    trigger(
+    trigger(  // Loading bar animations - fade in / out smoothly
       'loadingAnimation', [
         transition(':enter', [
           style({opacity: 0}),
@@ -31,7 +31,7 @@ import { first, take } from 'rxjs/operators';
         ]),
         transition(':leave', [
           style({opacity: 1}),
-          animate('500ms ease-out', style({opacity: 0})),
+          animate('1000ms ease-out', style({opacity: 0})),
         ])
       ]
     )
@@ -71,12 +71,12 @@ export class MapComponent {
         let year = new Date().getFullYear();
         let month =  new Date().getMonth();
 
-        this.dataService.updateData(year, month, coords[0], coords[1]);  // Make API call with geo data
+        this.dataService.updateData(year, coords[0], coords[1]);  // Make API call with geo data
       })
       .catch(error => {  // If no geo data avalaible, setup map with defaults
         console.log(error)
         // this.setupMap(this.dataService.defaultLat, this.dataService.defaultLng);
-        this.dataService.updateData(new Date().getFullYear() -1, 1, this.dataService.defaultLat, this.dataService.defaultLng);
+        this.dataService.updateData(new Date().getFullYear() -1, this.dataService.defaultLat, this.dataService.defaultLng);
         this.userLatCoord = this.dataService.defaultLat;
         this.userLngCoord = this.dataService.defaultLng;
       });
@@ -101,15 +101,12 @@ export class MapComponent {
         this.dataService.showCurrentData.subscribe(data => {
           this.apiData = data;
           console.log("Editting MAPPPPP");
+          console.log(data[0].location.latitude, data[0].location.longitude);
           // console.log("DATA!!!!", this.apiData);
           // BUILD NEW MAP WHEN API DATA IS CHANGED!
             console.log("crime data found");
-            try{
-              this.editMap(this.apiData[0].location.latitude, this.apiData[0].location.longitude);
-            }
-            catch{
-              this.editMap(this.userLatCoord, this.userLngCoord);
-            }
+              this.editMap(data[0].location.latitude, data[0].location.longitude);
+
 
         });
   }
@@ -192,6 +189,7 @@ export class MapComponent {
   editMap(userLat: number, userLong: number){
 
     console.log("Editting map");
+    console.log(userLat,userLong);
 
     // Setup new center location
     this.map.setView(new View({
