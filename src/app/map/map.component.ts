@@ -118,7 +118,10 @@ export class MapComponent {
       target: 'map',
       layers: [
         new TileLayer({
-          source: new OSM()
+          source: new OSM({
+            url: 'https://tile-a.openstreetmap.fr/hot/{z}/{x}/{y}.png',
+            crossOrigin: null
+        })
         })
       ],
       view: new View({
