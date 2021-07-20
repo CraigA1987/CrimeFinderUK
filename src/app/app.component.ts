@@ -9,13 +9,14 @@ import {BrowserModule} from '@angular/platform-browser'
 })
 export class AppComponent {
 
-  @ViewChild('tabs') tabsGroup: MatTabGroup;
+  @ViewChild('tabs') tabsGroup: MatTabGroup;  // Reference to tabsGroup in template
 
   constructor() { }
 
-  // Function is passed to child component
+  // When reset tabs event is emitted from child search component (via @Output),
+  // app.component calls the reset tabs function via the template
   resetTabs(){
-    this.tabsGroup.selectedIndex = 0;
+    this.tabsGroup.selectedIndex = 0;   // Resets the tab choice back to the map tab
   }
 
 }

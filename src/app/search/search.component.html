@@ -17,7 +17,7 @@
         <mat-form-field appearance="outline" color="accent">
           <mat-label for="text">Enter full year</mat-label>
           <input matInput type="number" matNativeControl placeholder="Year" [(ngModel)]="search.year" name="year" type="number"
-          [max]="maxYearValue" [min]="minYearValue" maxLength="4" required>
+          [max]="maxYearValue" [min]="minYearValue" minLength="4" maxLength="4" required>
         </mat-form-field>
         <mat-card-actions id="button-group">
           <button type="submit" id="submit-button" mat-stroked-button color="primary"

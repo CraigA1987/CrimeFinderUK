@@ -36,26 +36,23 @@ export class SearchComponent implements OnInit {
     })
   }
 
-  // On form submit
+  // On form submit actions
   onFormSubmit(form: NgForm){
+    let searchYear = this.search.year;  // stores search year to be used later in promise chain
     // variables store geodata from api call
-    // let data service make API call
+    // let data service make call to Geocoding service API - https://nominatim.openstreetmap.org
+    // API is used to convert place names into coordinates
     this.dataService.doGeocoding(this.search.location)
-    .then(locationData => {
-      this.resetTabs.emit(null); // pass event to parent (app.component.ts) - resets tabs back to map
-      console.log(locationData)
-      // If no data returns, let user know via a message
-      if(locationData.length === 0){
-        this.locationFound = false;
-      }
-       else{
-         this.locationFound = true;
-         let foundLat = Number(locationData[0].lat);
-         let foundLng = Number(locationData[0].lon);
-         this.dataService.updateData(this.search.year, foundLat, foundLng);
-      }
+    .then(locationData => {  // If place converted into coords successfully
+      // Convert coords into numbers, and push new coords to data service to search for crimes at that location
+      this.locationFound = true;
+      let foundLat = Number(locationData[0].lat);
+      let foundLng = Number(locationData[0].lon);
+      this.dataService.updateData(searchYear, foundLat, foundLng);
+      this.resetTabs.emit(null); // emit event to parent (app.component.ts) via html template - resets tabs back to map tab
     }
-    ).catch((err) => {this.locationFound = false;})
+    ).catch((err) => {  // Catch dataService geocoding API call returns an empty data array - location not found
+      this.locationFound = false;})  // If place name cannot be converted into coords by API, dont update data
     // Reset each form control, clearing any errors on reset
     form.reset({
       "location": '',
@@ -66,15 +63,12 @@ export class SearchComponent implements OnInit {
      });
     };
 
+    // Method ensures any types number entries are valid - 4 characters long and between the min and max years values
     yearValidation(year: number){
-      if(String(year).length > 4){
-        console.log("Make input error");
-      }
-      else if(String(year).length == 4){
+     if(String(year).length >= 4){
         if(year > this.maxYearValue || year < this.minYearValue){
           this.ngForm.controls['year'].setErrors({'incorrect': true});
         }
-
       }
     }
 
