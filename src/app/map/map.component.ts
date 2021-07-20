@@ -27,7 +27,7 @@ import { first, take } from 'rxjs/operators';
       'loadingAnimation', [
         transition(':enter', [
           style({opacity: 0}),
-          animate('500ms ease-in', style({opacity: 1}))
+          animate('10ms ease-in', style({opacity: 1}))
         ]),
         transition(':leave', [
           style({opacity: 1}),
@@ -42,10 +42,7 @@ import { first, take } from 'rxjs/operators';
 
 export class MapComponent {
   map: any;
-  apiData: any;  // stores all retrieved api data
-
-  userLatCoord: number;
-  userLngCoord: number;
+  apiData: any;  // stores all retrieved api dat
 
   dataIsLoading: boolean;
 
@@ -63,22 +60,14 @@ export class MapComponent {
     this.getLocationPermissions()
       .then(this.findUserLocation)  // Attempt to get users initial geolocation info
       .then((coords) => {  // If get geo data, Setup the map from the resulting geolocation data
-        console.log(coords);
-
-        this.userLatCoord = coords[0];
-        this.userLngCoord = coords[1];
-        // Get current date
         let year = new Date().getFullYear();
         let month =  new Date().getMonth();
-
-        this.dataService.updateData(year, coords[0], coords[1]);  // Make API call with geo data
+        this.dataService.updateData(year, coords[0], coords[1]);  // Make API call with found user geodata
       })
       .catch(error => {  // If no geo data avalaible, setup map with defaults
         console.log(error)
-        // this.setupMap(this.dataService.defaultLat, this.dataService.defaultLng);
-        this.dataService.updateData(new Date().getFullYear() -1, this.dataService.defaultLat, this.dataService.defaultLng);
-        this.userLatCoord = this.dataService.defaultLat;
-        this.userLngCoord = this.dataService.defaultLng;
+        // Use the default location data set to central London if no geodata is given
+        this.dataService.updateData(new Date().getFullYear() -1, this.dataService.userLat, this.dataService.userLng);
       });
 
     // Subscribe to the dataService using first() so this only triggers once
@@ -89,26 +78,20 @@ export class MapComponent {
       console.log(this.apiData.length);
       if(this.apiData.length < 1){
         console.log("no crime data found");  // Get coords based on the users coords
-        this.setupMap(this.userLatCoord, this.userLngCoord);
+        // ERROR MESSAGE TO USER
       }
       else{
         console.log("crime data found");
-        this.setupMap(this.apiData[0].location.latitude, this.apiData[0].location.longitude);
+        // NO ERROR MESSAGE
       }
+      console.log("COORDS BEFORE SETUP ==== ", this.dataService.userLat, this.dataService.userLng);
+      this.setupMap(this.dataService.userLat, this.dataService.userLng);  // Setup map based on geodata given to the data service
     });
 
-        // Subscribe to the dataService currentData so that we always get upto date crime data
-        this.dataService.showCurrentData.subscribe(data => {
-          this.apiData = data;
-          console.log("Editting MAPPPPP");
-          console.log(data[0].location.latitude, data[0].location.longitude);
-          // console.log("DATA!!!!", this.apiData);
-          // BUILD NEW MAP WHEN API DATA IS CHANGED!
-            console.log("crime data found");
-              this.editMap(data[0].location.latitude, data[0].location.longitude);
-
-
-        });
+    // Subscribe to the dataService currentData so that we always get upto date crime data
+    this.dataService.showCurrentData.subscribe(data => {
+      this.editMap(this.dataService.userLat, this.dataService.userLng);
+    });
   }
 
   getLocationPermissions() {
@@ -133,6 +116,8 @@ export class MapComponent {
   findUserLocation() {
     return new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(position => {
+        console.log("GEO TEST");
+        console.log("GEO POSITION ===== ", position);
         if( position != null){
           console.log("Geodata found");
           console.log(position.coords);
@@ -142,7 +127,7 @@ export class MapComponent {
         }
         else{
           console.log("no location found");
-          reject([this.dataService.defaultLat, this.dataService.defaultLng]);
+          reject([this.dataService.userLat, this.dataService.userLng]);  // use default position if no geodata found
         }
       })
     })
@@ -151,7 +136,7 @@ export class MapComponent {
   // Function gets users starting user, pinning it to the map, if not default to London
   setupMap(userLat: number, userLong: number) {
     console.log("MAP SETUP");
-    // console.log(this.user);
+    console.log(userLat, userLong);
     const options: object = {
       enableHighAccuracy: true,
       timeout: 5000,
@@ -190,7 +175,6 @@ export class MapComponent {
 
     console.log("Editting map");
     console.log(userLat,userLong);
-
     // Setup new center location
     this.map.setView(new View({
       center: olProj.fromLonLat([userLong, userLat]),

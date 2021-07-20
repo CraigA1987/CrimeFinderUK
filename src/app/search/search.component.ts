@@ -1,7 +1,6 @@
-import { Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import { DataService } from "src/app/data.service";
 import {NgForm} from '@angular/forms';
-import { formatCurrency } from '@angular/common';
 
 @Component({
   selector: 'app-search',
@@ -9,14 +8,19 @@ import { formatCurrency } from '@angular/common';
   styleUrls: ['./search.component.scss']
 })
 export class SearchComponent implements OnInit {
-
+  // Output directive allows component parent component to listen for any resetTab events from the search component
   @Output('resetTabs') resetTabs: EventEmitter<any> = new EventEmitter();
 
-// Object keeps track of the form input data for template driven form
+  // ViewChild directive gives access to the html element in the template which matches the selector
+  @ViewChild('form',{ static: true }) ngForm: NgForm;
+
+  // Object keeps track of the form input data for template driven form
   search = {
     location: null,
     year: new Date().getFullYear()
   };
+
+  formChangesSubscription: any;  // Observable used to detect any changes to form - used for validation purposes
 
   // Ensure form date is locaked down to current year as max, and 50 years ago as min year
   maxYearValue = new Date().getFullYear();
@@ -27,24 +31,18 @@ export class SearchComponent implements OnInit {
   constructor(private dataService: DataService) { }
 
   ngOnInit(): void {
-    console.log("search component created");
-    // this.currentYear = new Date().getFullYear(); // get the current year
-    // this.startYear = this.currentYear - 25;
+    this.formChangesSubscription = this.ngForm.form.valueChanges.subscribe(form => {
+      this.yearValidation(form.year)
+    })
   }
 
   // On form submit
   onFormSubmit(form: NgForm){
     // variables store geodata from api call
-    let foundLat;
-    let foundLng;
-    let foundYear = form.value.year;
-    console.log("YEAR!!!!!!", foundYear);
-
-    this.resetTabs.emit(null); // pass event to parent (app.component.ts) - resets tabs back to map
-
     // let data service make API call
-    let inputLocationGeocoded = this.dataService.doGeocoding(this.search.location)
+    this.dataService.doGeocoding(this.search.location)
     .then(locationData => {
+      this.resetTabs.emit(null); // pass event to parent (app.component.ts) - resets tabs back to map
       console.log(locationData)
       // If no data returns, let user know via a message
       if(locationData.length === 0){
@@ -52,35 +50,32 @@ export class SearchComponent implements OnInit {
       }
        else{
          this.locationFound = true;
-         console.log()
-         console.log("else hit");
          let foundLat = Number(locationData[0].lat);
-         console.log("else hit2");
          let foundLng = Number(locationData[0].lon);
-         console.log("else hit3");
-         console.log("lat === ", foundLat, "long === ", foundLng, "date ==== ", foundYear);
-         console.log("else hit4");
-         this.dataService.updateData(foundYear, foundLat, foundLng);
-         console.log("else hit5");
+         this.dataService.updateData(this.search.year, foundLat, foundLng);
       }
     }
     ).catch((err) => {this.locationFound = false;})
     // Reset each form control, clearing any errors on reset
-    form.reset();
+    form.reset({
+      "location": '',
+      "year": new Date().getFullYear(),
+    });
     Object.keys(form.controls).forEach(key =>{
       form.controls[key].setErrors(null)
      });
     };
 
+    yearValidation(year: number){
+      if(String(year).length > 4){
+        console.log("Make input error");
+      }
+      else if(String(year).length == 4){
+        if(year > this.maxYearValue || year < this.minYearValue){
+          this.ngForm.controls['year'].setErrors({'incorrect': true});
+        }
 
-
-
-    // if locatio is found
-    //this.locationFound = true;
-
-    // switch to map tab
-    // this.dataService.updateData(new Date().getFullYear() -1, 1, this.dataService.defaultLat, this.dataService.defaultLng);
-    // this.resetTabs.emit(null); // pass event to parent (app.component.ts);
-
+      }
+    }
 
 }

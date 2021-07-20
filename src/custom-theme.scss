@@ -5,7 +5,7 @@
 @include mat-core();
 
 $theming-material-components-primary: mat-palette($mat-indigo);
-$theming-material-components-accent: mat-palette($mat-red);
+$theming-material-components-accent: mat-palette($mat-light-blue);
 $theming-material-components-warn: mat-palette($mat-red);
 
 $theming-material-components-theme: mat-light-theme(

@@ -15,8 +15,8 @@ export class DataService {
   // ensuring data is controlled from only this service
 
   // Default values for when no lat / long values are found - central london
-  public defaultLat: number = 51.5014;
-  public defaultLng: number = -0.1419;
+  public userLat: number = 51.5014;
+  public userLng: number = -0.1419;
 
   isLoading: Subject<boolean> = new Subject<boolean>(); // loading boolean to control loading spinner
 
@@ -29,6 +29,8 @@ export class DataService {
     console.log("UPDATING DATA ACROSS APP");
     console.log("year === ", year, "lat ==== ", lat, "long =====", long);
     this.isLoading.next(true);
+    this.userLat = lat;
+    this.userLng = long;
     const apiRequests = [];  // Hold all of the api request - one for each month
     for(let i = 1; i < 13; i++){  // loop 12 times
       // Crimes at a specific location, to the nearest pre-defined location
@@ -48,29 +50,30 @@ export class DataService {
           completedCrimeList.push(crime);
         });
       });
-      if(completedCrimeList === undefined){
-        console.log(`NO DATA FOUND AT LOCATION, DEFAULTING TO BUCKINGHAM PALACE IN JAN ${year}`);
-        let updatedData = this.http
-          .get(`https://data.police.uk/api/crimes-at-location?date=${year}-01&lat=${this.defaultLat}&lng=${this.defaultLng}`)
-          .subscribe(res => {
-            this.currentData.next(res);
-          })
-      }
-      else{
+      // if(completedCrimeList === undefined){
+      //   console.log(`NO DATA FOUND AT LOCATION, DEFAULTING TO BUCKINGHAM PALACE IN JAN ${year}`);
+      //   let updatedData = this.http
+      //     .get(`https://data.police.uk/api/crimes-at-location?date=${year}-01&lat=${this.userLat}&lng=${this.userLng}`)
+      //     .subscribe(res => {
+      //       this.currentData.next(res);
+      //     })
+      // }
+      // else{
         this.currentData.next(completedCrimeList);
         console.log("CrimeList========", completedCrimeList);
         setTimeout(() => this.isLoading.next(false), 500);  // half a second delay on removal of loading bar
-      }
+      //}
       },
       // REMOVE ALL THIS CODE -> NEED TO PUT MESSAGES IN COMPONENETS IF NO CRIMES ARE FOUND NOT HERE!!!!
-      error => { // If non recognised location - revert back to default values
-        console.log(`NO DATA FOUND AT LOCATION, DEFAULTING TO BUCKINGHAM PALACE IN JAN ${year}`);
-        let updatedData = this.http
-          .get(`https://data.police.uk/api/crimes-at-location?date=${year}-01&lat=${this.defaultLat}&lng=${this.defaultLng}`)
-          .subscribe(res => {
-            this.currentData.next(res);
-          })
-      });
+      // error => { // If non recognised location - revert back to default values
+      //   console.log(`NO DATA FOUND AT LOCATION, DEFAULTING TO BUCKINGHAM PALACE IN JAN ${year}`);
+      //   let updatedData = this.http
+      //     .get(`https://data.police.uk/api/crimes-at-location?date=${year}-01&lat=${this.userLat}&lng=${this.userLng}`)
+      //     .subscribe(res => {
+      //       this.currentData.next(res);
+      //     })
+      // });
+    )
   }
 
   // Send string location to geocoding API
@@ -78,6 +81,7 @@ export class DataService {
       console.log(locationString);
       let correctedString = locationString.split(' ').join('%20'); // API uses %20 as spaces
       correctedString = correctedString.split('+').join('%20'); // API uses %20 as spaces not '+'
+      correctedString = correctedString.split(',').join('%20'); // API uses %20 and doesnt recognise commas between street names etc
       let geocodeRequest = new Promise((resolve, reject) => {
       this.http
           .get(`https://nominatim.openstreetmap.org/search/${correctedString}?format=json`)
@@ -85,7 +89,13 @@ export class DataService {
           .then((res: any) => {
             console.log(res);
             // Success - return first array element returned from the API
-            resolve(res);
+            if(res.length >= 1){
+              resolve(res);
+            }
+            else{
+              console.log("rejected geo find");
+              reject();
+            }
           },
             err => {
               // Error - just send an empty array

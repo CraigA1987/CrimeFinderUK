@@ -45,18 +45,16 @@ export class InfoComponent implements OnInit{
         }
         // If outcome is null from api request, try / catch prevents the error
         try{
-          mappedCrimeData.outcome = crime.outcome_status.category
+        mappedCrimeData.outcome = crime.outcome_status.category;
         }
         catch{
           mappedCrimeData.outcome = "Status update unavaliable";
         }
         this.crimeDataArray.push(mappedCrimeData);
+      });
         this.dataSource.data = this.crimeDataArray;  // update the table datasource
         this.crimeNumber = this.dataSource.data.length;
-      });
-    })
-    console.log("crime array data ====", this.crimeDataArray);
-  }
+  })}
 }
 
 
