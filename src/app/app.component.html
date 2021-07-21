@@ -1,9 +1,9 @@
 <body class="mat-app-background">
 
 <h1 id="title">Crime Finder</h1>
-  <mat-tab-group #tabs mat-align-tabs="center" dynamicHeight>
+  <mat-tab-group #tabs mat-align-tabs="center" dynamicHeight (selectedTabChange)="tabClick($event)">
     <mat-tab label="Map">
-      <app-map></app-map>
+      <app-map [tabChange]="mapTabPressed.asObservable()"></app-map>
         <ng-template mat-tab-label>
           Map
         <mat-icon class="angular-icon">map</mat-icon>

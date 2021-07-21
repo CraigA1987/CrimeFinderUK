@@ -10,13 +10,13 @@
     <mat-card-content class="form-container">
       <form #form="ngForm" (ngSubmit)="onFormSubmit(form)">
         <mat-form-field appearance="outline" color="accent">
-          <mat-label for="text">Enter place name or postcode</mat-label>
+          <mat-label for="text">Enter location</mat-label>
           <input matInput matNativeControl placeholder="Location" [(ngModel)]="search.location" name="location"  type="text"
           maxlength="50" minlength="1" required>
         </mat-form-field>
         <mat-form-field appearance="outline" color="accent">
           <mat-label for="text">Enter full year</mat-label>
-          <input matInput type="number" matNativeControl placeholder="Year" [(ngModel)]="search.year" name="year" type="number"
+          <input matInput matNativeControl type="number" placeholder="Year" [(ngModel)]="search.year" name="year" type="number"
           [max]="maxYearValue" [min]="minYearValue" minLength="4" maxLength="4" required>
         </mat-form-field>
         <mat-card-actions id="button-group">

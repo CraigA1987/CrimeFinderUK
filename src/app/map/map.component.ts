@@ -1,19 +1,16 @@
 // Map component creates a map and shows users the location of the search.
 // If no location can be found on initialisation, a default map is created based on central London
 
-import { Component } from '@angular/core'
+import { Component, Input } from '@angular/core'
 import { BrowserModule } from '@angular/platform-browser'
 import { AppComponent } from '../app.component';
 import { DataService } from "src/app/data.service";
 
+import * as L from 'leaflet';
+
 import { trigger, style, animate, transition } from '@angular/animations';
-import Map from 'ol/Map';
-import View from 'ol/View';
-import Overlay from 'ol/Overlay';
-import OSM from 'ol/source/OSM';
-import * as olProj from 'ol/proj';
-import TileLayer from 'ol/layer/Tile';
 import { take } from 'rxjs/operators';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-map',
@@ -37,11 +34,19 @@ import { take } from 'rxjs/operators';
 
 export class MapComponent {
   map: any;  // stores reference to created map object
+  marker: any; // stores reference to created map marker object
   currentMapMarker: any; // reference to the current map marker
+
+  // Holds upto date location data
+  userLat: number;
+  userLong: number;
 
   dataIsLoading: boolean;  // Boolean value used to show / hide Angular material loading bar in template
 
   constructor(private dataService: DataService) { }
+
+  private tabsSubscription: Subscription;  // Store subscription of map tab change from parent
+  @Input() tabChange: Observable<any>;  // Gets the input from parent component on each change to map tab
 
   ngOnInit() {
     // Subscribe to data Service loading variable changes
@@ -72,6 +77,14 @@ export class MapComponent {
     this.dataService.showCurrentData.subscribe(data => {
       // Each time data is updated in the data service, it is pushed here, and the map is updated accordingly
       this.editMap(this.dataService.userLat, this.dataService.userLng);
+    });
+
+    // Subscription triggered on any tab change to maps tab
+    // Used to ensure a map is always displayed
+    this.tabsSubscription = this.tabChange.subscribe(() => {
+      if(this.map === undefined){  // If map was not setup, set up first
+        this.setupMap(this.userLat, this.userLong);
+      }
     });
   }
 
@@ -106,58 +119,52 @@ export class MapComponent {
   }
 
   // Function takes users starting location and creates a map from it
-  // The Open Street Map library is used to create the map and add a marker
+  // The Leaflet.js library is used to render the map
   setupMap(userLat: number, userLong: number) {
-    const options: object = {
-      enableHighAccuracy: true,
-      timeout: 5000,
-      maximumAge: 0
-    };
-
-    this.map = new Map({
-      target: 'map',
-      layers: [
-        new TileLayer({
-          source: new OSM({
-            url: 'https://tile-a.openstreetmap.fr/hot/{z}/{x}/{y}.png',
-            crossOrigin: null
-        })
-        })
-      ],
-      view: new View({
-        center: olProj.fromLonLat([userLong, userLat]),
+    this.userLat = userLat;
+    this.userLong = userLong;
+    try{
+      this.map = L.map('map', {
+        center: [ userLat, userLong ],
         zoom: 16
-      })
-    });
+      });
 
-    var pos = olProj.fromLonLat([userLong, userLat]);
+      // Create map background layer
+      const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            minZoom: 3,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          });
+     tiles.addTo(this.map);  // Add background to map
 
-// https://openlayers.org/en/latest/examples/overlay.html
-    this.currentMapMarker = new Overlay({
-      position: pos,
-      positioning: 'center-center',
-      element: document.getElementById('marker'),
-      stopEvent: false,
-    });
-    this.map.addOverlay(this.currentMapMarker);
+      // Create the marker
+      let markerIcon = L.icon({
+        iconUrl: '../../assets/marker.png',
+        iconSize: [45, 70],
+        });
+
+      // add marker to map at center location
+      this.marker = L.marker([userLat, userLong], {icon: markerIcon}).addTo(this.map);
+      this.marker.bindPopup("approximate crime search location");
+      this.marker.setOpacity(0.8);
+    }
+    catch{
+      // If map is not created incase a tab is changed during loading, prevents app from breaking
+    }
+
   }
 
   // Method is used to edit the map, creating a new center point and marker based on input coordinates
   editMap(userLat: number, userLong: number){
-    this.map.setView(new View({
-      center: olProj.fromLonLat([userLong, userLat]),
-      zoom: 16,
-    }));
-    var pos = olProj.fromLonLat([userLong, userLat]);
-
-    // Set new map marker location
-    this.currentMapMarker = new Overlay({
-      position: pos,
-      positioning: 'center-center',
-      element: document.getElementById('marker'),
-      stopEvent: false,
-    });
-    this.map.addOverlay(this.currentMapMarker);
-  }
+    try{
+      this.userLat = userLat;
+    this.userLong = userLong;
+    this.map.panTo(new L.LatLng(userLat, userLong));  // move map view to new coords
+    this.marker.setLatLng([userLat, userLong]);  // move map market to center of new coords
+    }
+    catch{
+      // Prevents error being shown in console to user
+    }
+   }
 
 };

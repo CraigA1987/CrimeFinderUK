@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
 import { DataService } from "src/app/data.service";
 import {NgForm} from '@angular/forms';
 
@@ -22,9 +22,9 @@ export class SearchComponent implements OnInit {
 
   formChangesSubscription: any;  // Observable used to detect any changes to form - used for validation purposes
 
-  // Ensure form date is locaked down to current year as max, and 50 years ago as min year
+  // Ensure form date is locaked down to current year as max, and 25 years ago as min year
   maxYearValue = new Date().getFullYear();
-  minYearValue = this.maxYearValue - 50;
+  minYearValue = this.maxYearValue - 25;
 
   locationFound = true; // Varaible controls message if location cannot be found via API
 
@@ -32,7 +32,13 @@ export class SearchComponent implements OnInit {
 
   ngOnInit(): void {
     this.formChangesSubscription = this.ngForm.form.valueChanges.subscribe(form => {
-      this.yearValidation(form.year)
+      // Try / Catch block ensures form doesn't throw any error if its not fully created yet
+      // Tabs cause issues with content rendering - ngAfterViewInit did not resolve unfortunately
+      try{
+        this.yearValidation(form.year);
+      }
+      catch{
+      }
     })
   }
 
@@ -65,10 +71,13 @@ export class SearchComponent implements OnInit {
 
     // Method ensures any types number entries are valid - 4 characters long and between the min and max years values
     yearValidation(year: number){
-     if(String(year).length >= 4){
+     if(String(year).length === 4){
         if(year > this.maxYearValue || year < this.minYearValue){
           this.ngForm.controls['year'].setErrors({'incorrect': true});
         }
+      }
+      else {  // If less than 4 characters or more than 4 characters - error
+        this.ngForm.controls['year'].setErrors({'incorrect': true});
       }
     }
 
