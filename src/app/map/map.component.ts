@@ -1,7 +1,7 @@
 // Map component creates a map and shows users the location of the search.
 // If no location can be found on initialisation, a default map is created based on central London
 
-import { Component, Input } from '@angular/core'
+import { Component, Input, HostBinding } from '@angular/core'
 import { BrowserModule } from '@angular/platform-browser'
 import { AppComponent } from '../app.component';
 import { DataService } from "src/app/data.service";
@@ -48,11 +48,11 @@ export class MapComponent {
   userLong: number;
 
   dataIsLoading: boolean;  // Boolean value used to show / hide Angular material loading bar in template
-
   constructor(private dataService: DataService) { }
 
   private tabsSubscription: Subscription;  // Store subscription of map tab change from parent
   @Input() tabChange: Observable<any>;  // Gets the input from parent component on each change to map tab
+  @HostBinding('class.hidden') visible: boolean = true;  // True when visible
 
   ngAfterViewInit() {
     // Subscribe to data Service loading variable changes
@@ -88,9 +88,11 @@ export class MapComponent {
     // Subscription triggered on any tab change to maps tab
     // Used to ensure a map is always displayed
     this.tabsSubscription = this.tabChange.subscribe(() => {
-      if(this.map === undefined){  // If map was not setup, set up first
-        this.setupMap(this.userLat, this.userLong);
-      }
+      setTimeout(() => {  // Give delay to allow time for content render
+        if(this.map.frameIndex_ === 0){  // If map was not setup, set up first
+          this.setupMap(this.userLat, this.userLong);
+        }
+      }, 1000)
     });
   }
 
@@ -125,7 +127,7 @@ export class MapComponent {
   }
 
   // Function takes users starting location and creates a map from it
-  // The Leaflet.js library is used to render the map
+  // The open street map library is used to render the map
   setupMap(userLat: number, userLong: number) {
     this.userLat = userLat;
     this.userLong = userLong;
@@ -160,8 +162,6 @@ export class MapComponent {
       });
       this.map.addOverlay(this.currentMapMarker);
       this.map.updateSize();
-      let hiddenClass = document.getElementsByClassName('hidden');  // Remove hidden marker when ready to show
-      hiddenClass[0].classList.remove("hidden");
     }
     catch{
       // If map is not created incase a tab is changed during loading, prevents app from breaking

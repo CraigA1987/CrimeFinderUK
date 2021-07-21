@@ -8,7 +8,7 @@
 
 <div div class="row">
   <div id="map"></div>
-  <div id="marker" class="hidden" title="Marker"></div>
+  <div id="marker" [ngClass]="{'reveled': dataIsLoading === false , 'hidden': dataIsLoading === true}" title="Marker"></div>
 <div>
 
 
