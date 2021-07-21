@@ -159,6 +159,9 @@ export class MapComponent {
         stopEvent: false,
       });
       this.map.addOverlay(this.currentMapMarker);
+      this.map.updateSize();
+      let hiddenClass = document.getElementsByClassName('hidden');  // Remove hidden marker when ready to show
+      hiddenClass[0].classList.remove("hidden");
     }
     catch{
       // If map is not created incase a tab is changed during loading, prevents app from breaking
@@ -183,6 +186,7 @@ export class MapComponent {
         stopEvent: false,
       });
       this.map.addOverlay(this.currentMapMarker);
+      this.map.updateSize();
     }
     catch{
       // Prevents error being shown in console to user

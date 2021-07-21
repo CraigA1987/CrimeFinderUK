@@ -10,7 +10,7 @@
 #marker {
   width: 50px;
   height: 75px;
-  background-image: url(../src/assets/marker.png);
+  background-image: url(/assets/marker.png);
   background-size: cover;
   opacity: 0.85;
 }
