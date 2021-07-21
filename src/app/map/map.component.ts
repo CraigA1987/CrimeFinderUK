@@ -6,7 +6,13 @@ import { BrowserModule } from '@angular/platform-browser'
 import { AppComponent } from '../app.component';
 import { DataService } from "src/app/data.service";
 
-import * as L from 'leaflet';
+// import * as L from 'leaflet';
+import Map from 'ol/Map';
+import View from 'ol/View';
+import Overlay from 'ol/Overlay';
+import OSM from 'ol/source/OSM';
+import * as olProj from 'ol/proj';
+import TileLayer from 'ol/layer/Tile';
 
 import { trigger, style, animate, transition } from '@angular/animations';
 import { take } from 'rxjs/operators';
@@ -124,29 +130,35 @@ export class MapComponent {
     this.userLat = userLat;
     this.userLong = userLong;
     try{
-      this.map = L.map('map', {
-        center: [ userLat, userLong ],
-        zoom: 16
+      const options: object = {
+        enableHighAccuracy: true,
+        timeout: 5000,
+        maximumAge: 0
+      };
+
+      this.map = new Map({
+        target: 'map',
+        layers: [
+          new TileLayer({
+            source: new OSM()
+          })
+        ],
+        view: new View({
+          center: olProj.fromLonLat([userLong, userLat]),
+          zoom: 16
+        })
       });
 
-      // Create map background layer
-      const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 18,
-            minZoom: 3,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          });
-     tiles.addTo(this.map);  // Add background to map
+      var pos = olProj.fromLonLat([userLong, userLat]);
 
-      // Create the marker
-      let markerIcon = L.icon({
-        iconUrl: '../../assets/marker.png',
-        iconSize: [45, 70],
-        });
-
-      // add marker to map at center location
-      this.marker = L.marker([userLat, userLong], {icon: markerIcon}).addTo(this.map);
-      this.marker.bindPopup("approximate crime search location");
-      this.marker.setOpacity(0.8);
+  // https://openlayers.org/en/latest/examples/overlay.html
+      this.currentMapMarker = new Overlay({
+        position: pos,
+        positioning: 'center-center',
+        element: document.getElementById('marker'),
+        stopEvent: false,
+      });
+      this.map.addOverlay(this.currentMapMarker);
     }
     catch{
       // If map is not created incase a tab is changed during loading, prevents app from breaking
@@ -157,10 +169,20 @@ export class MapComponent {
   // Method is used to edit the map, creating a new center point and marker based on input coordinates
   editMap(userLat: number, userLong: number){
     try{
-      this.userLat = userLat;
-    this.userLong = userLong;
-    this.map.panTo(new L.LatLng(userLat, userLong));  // move map view to new coords
-    this.marker.setLatLng([userLat, userLong]);  // move map market to center of new coords
+      this.map.setView(new View({
+        center: olProj.fromLonLat([userLong, userLat]),
+        zoom: 16,
+      }));
+      var pos = olProj.fromLonLat([userLong, userLat]);
+
+      // Set new map marker location
+      this.currentMapMarker = new Overlay({
+        position: pos,
+        positioning: 'center-center',
+        element: document.getElementById('marker'),
+        stopEvent: false,
+      });
+      this.map.addOverlay(this.currentMapMarker);
     }
     catch{
       // Prevents error being shown in console to user

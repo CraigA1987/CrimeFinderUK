@@ -1,12 +1,14 @@
-<div *ngIf="dataIsLoading == true" @loadingAnimation >
+<div *ngIf="dataIsLoading == true" @loadingAnimation id="loadingBar">
   <mat-progress-bar mode="indeterminate" id="progress-bar" color="accent"></mat-progress-bar>
 </div>
 
-<div>
+<div id="description-div">
   <p id="map-description">The map shows the approximate location of the crime search</p>
 </div>
 
-<div div class="row">
-    <div id="map"></div>
-    <div id="marker" title="Marker"></div>
-<div>
+  <div div class="row">
+      <div id="map"></div>
+  </div>
+
+
+
