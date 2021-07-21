@@ -48,7 +48,7 @@ export class MapComponent {
   private tabsSubscription: Subscription;  // Store subscription of map tab change from parent
   @Input() tabChange: Observable<any>;  // Gets the input from parent component on each change to map tab
 
-  ngOnInit() {
+  ngAfterViewInit() {
     // Subscribe to data Service loading variable changes
     // When dataIsLoading = true, loading bar will be shown. Varaible changes to false once data is retreived from API
     // which then hides the loading bar
