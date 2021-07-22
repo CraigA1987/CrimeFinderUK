@@ -1,7 +1,7 @@
 // Map component creates a map and shows users the location of the search.
 // If no location can be found on initialisation, a default map is created based on central London
 
-import { Component, Input, HostBinding } from '@angular/core'
+import { Component, Input, HostBinding, OnInit } from '@angular/core'
 import { BrowserModule } from '@angular/platform-browser'
 import { AppComponent } from '../app.component';
 import { DataService } from "src/app/data.service";
@@ -54,6 +54,10 @@ export class MapComponent {
   @Input() tabChange: Observable<any>;  // Gets the input from parent component on each change to map tab
   @HostBinding('class.hidden') visible: boolean = true;  // True when visible
 
+  ngOnInit(){
+    this.dataIsLoading = true;  // Start loading bar as active and map marker as hidden
+  }
+
   ngAfterViewInit() {
     // Subscribe to data Service loading variable changes
     // When dataIsLoading = true, loading bar will be shown. Varaible changes to false once data is retreived from API
@@ -97,6 +101,7 @@ export class MapComponent {
   }
 
   getLocationPermissions() {
+    // promise containing results of user location data permissions
     return new Promise((resolve, reject) => {
       if (navigator.permissions) {
         navigator.permissions.query({ name: 'geolocation' }).then(result => {
@@ -109,10 +114,13 @@ export class MapComponent {
           }
         })
       }
+      else{  // If no navigator permissions detected at all
+        reject(`Rejected, no user services`);
+      }
     })
   }
 
-  // Returns array containing location data
+  // Returns array containing found location data from the browser
   findUserLocation() {
     return new Promise((resolve, reject) => {  // A Promise is returned, allowing a promise chain to be formed
       navigator.geolocation.getCurrentPosition(position => {  // Try to get broswer navigation API data
@@ -127,7 +135,7 @@ export class MapComponent {
   }
 
   // Function takes users starting location and creates a map from it
-  // The open street map library is used to render the map
+  // The open street map (OSM) library is used to render the map
   setupMap(userLat: number, userLong: number) {
     this.userLat = userLat;
     this.userLong = userLong;
@@ -153,7 +161,7 @@ export class MapComponent {
 
       var pos = olProj.fromLonLat([userLong, userLat]);
 
-  // https://openlayers.org/en/latest/examples/overlay.html
+  // https://openlayers.org/en/latest/examples/overlay.html -> Documentation for markers
       this.currentMapMarker = new Overlay({
         position: pos,
         positioning: 'center-center',
@@ -171,7 +179,7 @@ export class MapComponent {
 
   // Method is used to edit the map, creating a new center point and marker based on input coordinates
   editMap(userLat: number, userLong: number){
-    try{
+    try{  // Try and Catch prevents any errors from being shown to the user in the console
       this.map.setView(new View({
         center: olProj.fromLonLat([userLong, userLat]),
         zoom: 16,
